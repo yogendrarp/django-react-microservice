@@ -1,12 +1,13 @@
 version: '3.8'
+
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    command: 'python manage.py runserver 0.0.0.0:8000'
+    command: 'python main.py'
     ports:
-      - 8000:8000
+      - 8001:5000
     volumes:
       - .:/app
     depends_on:
@@ -24,11 +25,11 @@ services:
     image: mysql:8.0.34
     restart: always
     environment:
-      MYSQL_DATABASE: admin
-      MYSQL_USER: dev
-      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: main
+      MYSQL_USER: yogi
+      MYSQL_PASSWORD: yogendra20
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - .dbdata:/var/lib/mysql
     ports:
-      - 33066:3306
+      - 33067:3306
