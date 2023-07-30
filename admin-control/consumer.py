@@ -1,7 +1,11 @@
-import pika
-import json
-params = pika.URLParameters("amqps://sgknscuf:WUbB_Bl3EDLCOCfEVs1wCQDxbOw7lhkp@gull.rmq.cloudamqp.com/sgknscuf")
+import pika, json, os, django
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "admin.settings")
+django.setup()
+
+from products.models import Product
+params = pika.URLParameters("amqps://sgknscuf:WUbB_Bl3EDLCOCfEVs1wCQDxbOw7lhkp@gull.rmq.cloudamqp.com/sgknscuf")
+params.heartbeat=300
 connection = pika.BlockingConnection(params)
 
 channel = connection.channel()
@@ -9,13 +13,13 @@ channel = connection.channel()
 channel.queue_declare(queue='admin')
 
 def callback(ch, method, properties, body):
-    data = json.loads(body)
-    print(data)
-
-    if properties.content_type == "product_created ":
-        product = Product(id=data['id'], title=data['title'], image=data['image'])
-        db.session.add(product)
-        db.session.commit()
+    print("recieved in admin")
+    id = json.loads(body)
+    print(id)
+    product = Product.objects.get(id=id)
+    product.likes = product.likes + 1
+    product.save()
+    print("Product liked!!")
 
 channel.basic_consume(queue='admin', on_message_callback=callback, auto_ack=True)
 print('Started consuming')
